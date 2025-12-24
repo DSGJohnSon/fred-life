@@ -6,12 +6,16 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const user = await getCurrent();
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/login");
+  } else {
+    redirect('/hello');
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between p-4 border bg-stone-100 rounded-md">
-        Bonjour ! {user.name}, bienvenue sur votre espace personnel.
+        Bonjour ! Bienvenue sur votre espace personnel.
         <LogoutButton className="self-start " />
       </div>
     </div>

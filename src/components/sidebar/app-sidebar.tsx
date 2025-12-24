@@ -35,13 +35,9 @@ import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-sw
 import Image from "next/image";
 import { Separator } from "../ui/separator";
 import { UpdateWorkspaceNameForm } from "@/features/workspaces/components/forms/update-workspace-name-form";
+import { useCurrent } from "@/features/auth/api/use-current";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -157,6 +153,8 @@ export function AppSidebar({
   defaultWorkspaceId,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { defaultWorkspaceId: string }) {
+  const { data: user, isLoading: isLoadingUser } = useCurrent();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -190,7 +188,14 @@ export function AppSidebar({
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user == undefined || user == null ? null : (
+          <NavUser
+            user={{
+              ...user,
+              image: user.image ?? null, // Convert undefined to null
+            }}
+          />
+        )}
       </SidebarFooter>
     </Sidebar>
   );

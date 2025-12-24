@@ -1,10 +1,6 @@
-"use client"
+"use client";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,25 +9,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { LucideBell, LucideCreditCard, LucideLogOut, LucideMoreVertical, LucideUserCircle } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { useLogout } from "@/features/auth/api/use-logout";
+import { User } from "@prisma/client";
+import {
+  LucideBell,
+  LucideCreditCard,
+  LucideLoader,
+  LucideLogOut,
+  LucideMoreVertical,
+  LucideUserCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
-  const { isMobile } = useSidebar()
+export function NavUser({ user }: { user: User }) {
+  const { isMobile } = useSidebar();
+  const router = useRouter(); 
+
+  const { mutate: logout, isPending: isPendingLogout } = useLogout();
 
   return (
     <SidebarMenu>
@@ -43,8 +44,15 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                {user.image && <AvatarImage src={user.image} alt={user.name} />}
+                <AvatarFallback className="rounded-lg">
+                  {user.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 3)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -64,8 +72,17 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  {user.image && (
+                    <AvatarImage src={user.image} alt={user.name} />
+                  )}
+                  <AvatarFallback className="rounded-lg">
+                    {user.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 3)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -77,27 +94,41 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <LucideUserCircle />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <LucideCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <LucideBell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LucideLogOut />
-              Log out
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                logout()
+                router.push("/login")
+              }}
+              disabled={isPendingLogout}
+            >
+              {
+                isPendingLogout ? (
+                  <>
+                  <LucideLoader className="animate-spin" />
+                  <span>Redirection...</span>
+                  </>
+                ) : (
+                  <>
+                    <LucideLogOut />
+                    Se déconnecter
+                  </>
+                )
+              }
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
