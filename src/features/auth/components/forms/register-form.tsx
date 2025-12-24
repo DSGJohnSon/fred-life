@@ -17,10 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRegister } from "../../api/use-register";
 import { OAuthButtons } from "../oauth-buttons";
+import { useEffect, useState } from "react";
 
 export function RegisterForm() {
+  
   const { mutate } = useRegister();
-
+  
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -29,11 +31,18 @@ export function RegisterForm() {
       password: "",
     },
   });
-
+  
   function onSubmit(values: z.infer<typeof registerSchema>) {
     mutate({ json: values });
   }
+  
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
+  if (!mounted) return <div>Chargement...</div>;
+  
   return (
     <div className="space-y-6">
       <Form {...form}>

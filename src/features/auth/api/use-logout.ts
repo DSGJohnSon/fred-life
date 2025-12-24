@@ -14,7 +14,6 @@ export const useLogout = () => {
       queryClient.invalidateQueries({
         queryKey: ["current"],
       });
-      router.push("/login");
     },
   });
 

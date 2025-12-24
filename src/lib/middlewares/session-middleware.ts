@@ -1,7 +1,9 @@
 import "server-only";
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import { auth } from "./auth";
+import { auth } from "../auth";
+import { AUTH_COOKIE } from "@/features/auth/constants";
+
 type AdditionalContext = {
   Variables: {
     user: {
@@ -17,18 +19,23 @@ type AdditionalContext = {
     };
   };
 };
+
 export const sessionMiddleware = createMiddleware<AdditionalContext>(
   async (c, next) => {
-    const sessionToken = getCookie(c, "better-auth.session_token");
+    const sessionToken = getCookie(c, AUTH_COOKIE);
+  
     if (!sessionToken) {
       return c.json({ error: "Non autorisé" }, 401);
     }
+
     const session = await auth.api.getSession({
       headers: c.req.raw.headers,
     });
+
     if (!session) {
       return c.json({ error: "Session invalide" }, 401);
     }
+
     c.set("user", session.user);
     c.set("session", session.session);
     await next();

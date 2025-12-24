@@ -23,7 +23,6 @@ export const useRegister = () => {
       queryClient.invalidateQueries({
         queryKey: ["current"],
       });
-      router.push("/");
     },
   });
 

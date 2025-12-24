@@ -123,3 +123,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes opacityLoader {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-opacity-loader {
+  animation: opacityLoader 1.5s ease-in-out infinite;
+}

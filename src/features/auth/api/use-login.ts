@@ -22,7 +22,6 @@ export const useLogin = () => {
       queryClient.invalidateQueries({
         queryKey: ["current"],
       });
-      router.push("/");
     },
   });
 
