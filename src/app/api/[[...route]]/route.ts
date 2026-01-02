@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 
 import workspaces from "@/features/workspaces/server/route";
+import history from "@/features/history/server/route";
 
 const app = new Hono().basePath("/api");
 
@@ -15,7 +16,7 @@ const app = new Hono().basePath("/api");
 //   return c.text(`Hello ${name}`);
 // });
 
-const routes = app.route("/workspaces", workspaces);
+const routes = app.route("/workspaces", workspaces).route("/history", history);
 
 export const GET = handle(app);
 export const POST = handle(app);

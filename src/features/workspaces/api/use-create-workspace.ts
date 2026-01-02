@@ -15,7 +15,6 @@ type RequestType = InferRequestType<
 export const useCreateWorkspace = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: user } = useCurrent();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
@@ -28,7 +27,7 @@ export const useCreateWorkspace = () => {
       queryClient.invalidateQueries({
         queryKey: ["workspaces"],
       });
-      router.push(`/${response.data.id}/dashboard`);
+      router.push(`/workspaces/${response.data.id}/dashboard`);
       toast.success("Workspace créé avec succès!", {
         description: response.data.name,
         style: {

@@ -19,18 +19,24 @@ import {
 import { useLogout } from "@/features/auth/api/use-logout";
 import { User } from "@prisma/client";
 import {
-  LucideBell,
-  LucideCreditCard,
-  LucideLoader,
-  LucideLogOut,
-  LucideMoreVertical,
-  LucideUserCircle,
-} from "lucide-react";
+  LuBell,
+  LuCreditCard,
+  LuLoader,
+  LuLogOut,
+  LuEllipsis,
+  LuCircleUser,
+  LuClock,
+} from "react-icons/lu";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 export function NavUser({ user }: { user: User }) {
+  const pathname = usePathname();
+  const workspaceId = useWorkspaceId();
   const { isMobile } = useSidebar();
-  const router = useRouter(); 
+  const router = useRouter();
 
   const { mutate: logout, isPending: isPendingLogout } = useLogout();
 
@@ -43,7 +49,7 @@ export function NavUser({ user }: { user: User }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 {user.image && <AvatarImage src={user.image} alt={user.name} />}
                 <AvatarFallback className="rounded-lg">
                   {user.name
@@ -60,7 +66,7 @@ export function NavUser({ user }: { user: User }) {
                   {user.email}
                 </span>
               </div>
-              <LucideMoreVertical className="ml-auto size-4" />
+              <LuEllipsis className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -94,12 +100,34 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled>
-                <LucideUserCircle />
-                Account
+              <DropdownMenuItem
+                className={`cursor-pointer hover:bg-stone-100 ${
+                  pathname === `/account`
+                    ? "bg-stone-300 hover:bg-stone-300/90"
+                    : ""
+                }`}
+                asChild
+              >
+                <Link href={`/account`}>
+                  <LuCircleUser />
+                  Compte
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className={`cursor-pointer hover:bg-stone-100 ${
+                  pathname === `/workspaces/${workspaceId}/history`
+                    ? "bg-stone-300 hover:bg-stone-300/90"
+                    : ""
+                }`}
+                asChild
+              >
+                <Link href={`/workspaces/${workspaceId}/history`}>
+                  <LuClock />
+                  Historique
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
-                <LucideBell />
+                <LuBell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -107,24 +135,22 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => {
-                logout()
-                router.push("/login")
+                logout();
+                router.push("/login");
               }}
               disabled={isPendingLogout}
             >
-              {
-                isPendingLogout ? (
-                  <>
-                  <LucideLoader className="animate-spin" />
+              {isPendingLogout ? (
+                <>
+                  <LuLoader className="animate-spin" />
                   <span>Redirection...</span>
-                  </>
-                ) : (
-                  <>
-                    <LucideLogOut />
-                    Se déconnecter
-                  </>
-                )
-              }
+                </>
+              ) : (
+                <>
+                  <LuLogOut />
+                  Se déconnecter
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

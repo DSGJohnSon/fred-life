@@ -13,18 +13,21 @@ datasource db {
 // FEATURE: WORKSPACES
 // ============================================
 model Workspace {
-  id        String            @id @default(cuid())
-  name      String
-  avatarType WorkspaceAvatarType @default(TEXT)
-  avatar    String?
-  avatarColor1 String?
-  avatarColor2 String?
-  avatarWithText Boolean? @default(true)
-  ownerId   String
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  owner     User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members   WorkspaceMember[]
+  id             String              @id @default(cuid())
+  name           String
+  avatarType     WorkspaceAvatarType @default(TEXT)
+  avatar         String?
+  avatarColor1   String?
+  avatarColor2   String?
+  avatarWithText Boolean?            @default(true)
+  ownerId        String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  owner          User                @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members        WorkspaceMember[]
+
+  //Historique du workspace
+  auditLogs HistoryAuditLog[]
 
   // Relations avec finances
   accounts        Account[]
@@ -175,29 +178,44 @@ model FinanceAccountSnapshot {
 // FEATURE: HISTORY (AUDIT LOG)
 // ============================================
 model HistoryAuditLog {
-  id         String             @id @default(cuid())
-  userId     String // Qui a fait l'action
-  action     HistoryAuditAction
-  entityType String // Ex: "Workspace", "Account", "Transaction"
-  entityId   String // ID de l'entité concernée
-  changes    Json? // Détails des changements (avant/après)
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime           @default(now())
+  id          String             @id @default(cuid())
+  userId      String // Qui a fait l'action
+  action      HistoryAuditAction
+  entityType  HistoryEntityType // Type d'entité (Auth, Workspace, etc.)
+  entityId    String? // ID de l'entité concernée (null si non concerné)
+  workspaceId String? // ID du workspace concerné (null pour actions liés à l'utilisateur)
+  changes     Json? // Détails des changements (before/after)
+  ipAddress   String? // IP de l'utilisateur
+  userAgent   String? // User agent du navigateur
+  createdAt   DateTime           @default(now())
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace?         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
   @@index([userId, createdAt])
+  @@index([workspaceId, createdAt])
   @@map("audit_log")
 }
 
 enum HistoryAuditAction {
+  // Actions génériques (workspaces, etc.)
   CREATE
   UPDATE
   DELETE
+  // Actions d'authentification
+  REGISTER
+  LOGIN
+  LOGIN_OAUTH
+  // Actions spécifiques (futures)
   MARK
   UNMARK
   ARCHIVE
   UNARCHIVE
+}
+
+enum HistoryEntityType {
+  Auth // Actions d'authentification
+  Workspace // Actions sur les workspaces
 }
 
 // ============================================
@@ -217,6 +235,8 @@ model User {
 
   ownedWorkspaces      Workspace[]       @relation("WorkspaceOwner")
   workspaceMemberships WorkspaceMember[]
+
+  auditLogs HistoryAuditLog[]
 
   @@map("user")
 }

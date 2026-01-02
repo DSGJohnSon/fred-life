@@ -1,9 +1,9 @@
 import { sessionMiddleware } from "@/lib/middlewares/session-middleware";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { createWorkspaceSchema, updateWorkspaceNameSchema } from "../schemas";
+import { createWorkspaceSchema, getWorkspaceQuerySchema } from "../schemas";
 import { prisma } from "@/lib/prisma";
-import { workspaceOwnerMiddleware } from "@/lib/middlewares/workspace-middleware";
+import { createAuditLog } from "@/features/history/action";
 const app = new Hono()
   //******************** */
   //Créer un workspace
@@ -25,7 +25,23 @@ const app = new Hono()
           name,
           ownerId: user.id,
           avatarType: "TEXT",
+          members: {
+            create: {
+              userId: user.id,
+              role: "OWNER",
+            },
+          },
         },
+      });
+
+      createAuditLog({
+        userId: user.id,
+        action: "CREATE",
+        entityType: "Workspace",
+        entityId: workspace.id,
+        workspaceId: workspace.id,
+        changes: { before: {}, after: { name: workspace.name } },
+        request: c.req.raw,
       });
 
       return c.json({ data: workspace });
@@ -38,5 +54,36 @@ const app = new Hono()
     const workspaces = await prisma.workspace.findMany();
 
     return c.json({ data: workspaces });
-  });
+  })
+  .get(
+    "/:id",
+    sessionMiddleware,
+    zValidator("query", getWorkspaceQuerySchema),
+    async (c) => {
+      const { id } = c.req.param();
+      const { includeOwner, includeMembers } = c.req.valid("query");
+
+      // Get optional query parameters for including related data
+      const withWorspaceOwnerData = includeOwner || false;
+      const withWorkspaceMembersData = includeMembers || false;
+
+      const workspace = await prisma.workspace.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          owner: withWorspaceOwnerData,
+          members: withWorkspaceMembersData
+            ? {
+                include: {
+                  user: true,
+                },
+              }
+            : false,
+        },
+      });
+
+      return c.json({ data: workspace });
+    }
+  );
 export default app;

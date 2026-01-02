@@ -11,9 +11,9 @@ export const useLogout = () => {
       await authClient.signOut();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["current"],
-      });
+      queryClient.clear();
+      router.push("/login");
+      router.refresh();
     },
   });
 

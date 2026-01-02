@@ -1,1 +1,0 @@
-export const ACTIVE_WORKSPACE_COOKIE = 'active-workspace-id';

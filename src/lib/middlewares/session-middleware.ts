@@ -25,6 +25,8 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
     const sessionToken = getCookie(c, AUTH_COOKIE);
   
     if (!sessionToken) {
+      console.log("Session non trouvée");
+      console.log(sessionToken);
       return c.json({ error: "Non autorisé" }, 401);
     }
 
@@ -33,6 +35,7 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
     });
 
     if (!session) {
+      console.log("Session invalide");
       return c.json({ error: "Session invalide" }, 401);
     }
 

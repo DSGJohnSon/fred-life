@@ -21,9 +21,9 @@ export const WorkspaceAvatar = ({ name, className }: WorkspaceAvatarProps) => {
 export const WorkspaceAvatarHelloPage = ({ name, className }: WorkspaceAvatarProps) => {
   return (
     <Avatar
-      className={cn("size-24 relative rounded-lg overflow-hidden", className)}
+      className={cn("size-36 relative rounded-2xl overflow-hidden", className)}
     >
-      <AvatarFallback className="text-white bg-stone-500 hover:bg-stone-500/75 cursor-pointer font-semibold text-xl rounded-none">
+      <AvatarFallback className="text-white bg-stone-500 cursor-pointer font-semibold text-2xl rounded-none">
         {name.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>

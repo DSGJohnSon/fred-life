@@ -1,19 +1,30 @@
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getCurrent } from "@/features/auth/actions";
-import { useGetWorkspaceById } from "@/features/workspaces/api/use-get-workspace-by-id";
+import { getWorkspaceById } from "@/features/workspaces/actions";
 import { redirect } from "next/navigation";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
-  params: { workspaceId: string };
+  params: Promise<{ workspaceId: string }>;
 }
 
 async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
   const user = await getCurrent();
-  if (!user) redirect("/login");
-
   const { workspaceId } = await params;
+  const workspace = await getWorkspaceById(workspaceId, {
+    includeMembers: true,
+  });
+
+  //Vérif. que le workspace existe
+  if (!workspace || workspace.data == null) {
+    redirect("/workspaces/hello");
+  }
+
+  //Vérif que le user en ai membre.
+  if (!workspace.data.members.some((member) => member.userId === user?.id)) {
+    redirect("/workspaces/hello");
+  }
 
   return (
     <>
@@ -25,12 +36,9 @@ async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" defaultWorkspaceId={workspaceId} />
+        <AppSidebar variant="inset" />
         <SidebarInset>
-          <div>
-            {workspaceId || "No workspace selected"}
-            {children}
-          </div>
+          <div className="p-8">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </>

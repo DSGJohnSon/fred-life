@@ -1,30 +1,13 @@
 import "server-only";
 import { createMiddleware } from "hono/factory";
-import { getCookie } from "hono/cookie";
-import { ACTIVE_WORKSPACE_COOKIE } from "@/features/workspaces/constants";
 import { prisma } from "../prisma";
 
-type AdditionalContext = {
-  Variables: {
-    workspace: {
-      id: string;
-      name: string;
-      ownerId: string;
-      members: {
-        id: string;
-        userId: string;
-        role: string;
-      }[];
-    };
-  };
-};
-
 export const workspaceMiddleware = createMiddleware(async (c, next) => {
-  const workspaceId = getCookie(c, ACTIVE_WORKSPACE_COOKIE);
-  console.log("workspaceId", workspaceId);
+  const workspaceId = c.req.param("id");
 
   //Pas de workspace ID fourni :
   if (!workspaceId) {
+    console.log("Workspace ID manquant");
     return c.json({ error: "Workspace ID manquant" }, 400);
   }
 
@@ -39,6 +22,7 @@ export const workspaceMiddleware = createMiddleware(async (c, next) => {
 
   //Pas de workspace trouvé :
   if (!workspace) {
+    console.log("Workspace non trouvé");
     return c.json({ error: "Workspace non trouvé" }, 404);
   }
 
@@ -46,7 +30,12 @@ export const workspaceMiddleware = createMiddleware(async (c, next) => {
   const user = c.get("user");
   const isMember = workspace.members.some((member) => member.userId === user.id);
 
+  console.log("workspace", workspace);
+  console.log("members", workspace.members);
+  console.log("isMember", isMember);
+
   if (!isMember) {
+    console.log("Non autorisé, vous n'êtes pas membre de ce workspace");
     return c.json({ error: "Non autorisé, vous n'êtes pas membre de ce workspace" }, 401);
   }
 
@@ -59,10 +48,12 @@ export const workspaceOwnerMiddleware = createMiddleware(async (c, next) => {
   const user = c.get("user");
 
   if (!workspace) {
+    console.log("Workspace non trouvé");
     return c.json({ error: "Workspace non trouvé" }, 404);
   }
 
   if (workspace.ownerId !== user.id) {
+    console.log("Non autorisé, vous n'êtes pas propriétaire de ce workspace");
     return c.json({ error: "Non autorisé, vous n'êtes pas propriétaire de ce workspace" }, 401);
   }
 

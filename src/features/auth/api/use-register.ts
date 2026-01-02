@@ -23,6 +23,7 @@ export const useRegister = () => {
       queryClient.invalidateQueries({
         queryKey: ["current"],
       });
+      router.push("/workspaces/hello");
     },
   });
 

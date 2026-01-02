@@ -1,0 +1,2 @@
+export const HISTORY_PAGINATION_LIMIT = 20;
+export const HISTORY_MAX_LIMIT = 100;

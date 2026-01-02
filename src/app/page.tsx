@@ -9,7 +9,7 @@ export default async function Home() {
   if (!user) {
     redirect("/login");
   } else {
-    redirect('/hello');
+    redirect('/workspaces/hello');
   }
 
   return (
