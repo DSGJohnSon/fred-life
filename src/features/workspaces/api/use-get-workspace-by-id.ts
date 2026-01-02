@@ -29,8 +29,8 @@ export const useGetWorkspaceById = ({
                     id: workspaceId,
                 },
                 query: {
-                    includeOwner,
-                    includeMembers,
+                    includeOwner: includeOwner ? "true" : "false",
+                    includeMembers: includeMembers ? "true" : "false",
                 }
             });
 
