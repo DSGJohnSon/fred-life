@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { createWorkspaceSchema, getWorkspaceQuerySchema } from "../schemas";
 import { prisma } from "@/lib/prisma";
-import { createAuditLog } from "@/features/history/action";
 const app = new Hono()
   //******************** */
   //Créer un workspace
@@ -32,16 +31,6 @@ const app = new Hono()
             },
           },
         },
-      });
-
-      createAuditLog({
-        userId: user.id,
-        action: "CREATE",
-        entityType: "Workspace",
-        entityId: workspace.id,
-        workspaceId: workspace.id,
-        changes: { before: {}, after: { name: workspace.name } },
-        request: c.req.raw,
       });
 
       return c.json({ data: workspace });

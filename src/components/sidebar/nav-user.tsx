@@ -113,19 +113,6 @@ export function NavUser({ user }: { user: User }) {
                   Compte
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className={`cursor-pointer hover:bg-stone-100 ${
-                  pathname === `/workspaces/${workspaceId}/history`
-                    ? "bg-stone-300 hover:bg-stone-300/90"
-                    : ""
-                }`}
-                asChild
-              >
-                <Link href={`/workspaces/${workspaceId}/history`}>
-                  <LuClock />
-                  Historique
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <LuBell />
                 Notifications

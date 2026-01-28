@@ -1,5 +1,6 @@
 import { getCurrent } from "@/features/auth/actions";
 import CreateWorkspaceModal from "@/features/workspaces/components/modals/create-workspace-modal";
+import CreateProjectModal from "@/features/projects/components/modal/create-project-modal";
 import { redirect } from "next/navigation";
 
 interface WorkspaceLayoutProps {
@@ -13,6 +14,7 @@ async function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   return (
     <>
       <CreateWorkspaceModal />
+      <CreateProjectModal />
       {children}
     </>
   );

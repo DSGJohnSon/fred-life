@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { createAuditLog } from "@/features/history/action";
 
 async function handleAuthLogging(req: Request, res: Response) {
   try {
@@ -16,13 +15,6 @@ async function handleAuthLogging(req: Request, res: Response) {
 
         if (user?.id) {
           const action = path.endsWith("/sign-up/email") ? "REGISTER" : "LOGIN";
-          await createAuditLog({
-            userId: user.id,
-            action,
-            entityType: "Auth",
-            changes: { provider: "credentials" },
-            request: req,
-          });
         }
       }
     }
@@ -44,13 +36,6 @@ async function handleAuthLogging(req: Request, res: Response) {
 
       if (session?.user?.id) {
         const provider = path.split("/").pop() || "oauth";
-        await createAuditLog({
-          userId: session.user.id,
-          action: "LOGIN_OAUTH",
-          entityType: "Auth",
-          changes: { provider },
-          request: req,
-        });
       }
     }
   } catch (error) {

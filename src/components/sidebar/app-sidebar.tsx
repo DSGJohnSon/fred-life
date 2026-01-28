@@ -16,6 +16,7 @@ import {
   LuLayoutDashboard,
   LuDollarSign,
   LuClock,
+  LuFolderOpenDot,
 } from "react-icons/lu";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
@@ -39,6 +40,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LuLayoutDashboard,
       },
       {
+        title: "Projets",
+        url: `/workspaces/${workspaceId}/projects`,
+        icon: LuFolderOpenDot,
+      },
+      {
         title: "Finances Perso.",
         url: `/workspaces/${workspaceId}/finance`,
         icon: LuDollarSign,
@@ -49,11 +55,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Paramètres",
         url: `/workspaces/${workspaceId}/settings`,
         icon: LuCog,
-      },
-      {
-        title: "Historique du Workspace",
-        url: `/workspaces/${workspaceId}/history`,
-        icon: LuClock,
       }
     ]
   };

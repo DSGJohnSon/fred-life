@@ -26,13 +26,14 @@ model Workspace {
   owner          User                @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members        WorkspaceMember[]
 
-  //Historique du workspace
-  auditLogs HistoryAuditLog[]
-
   // Relations avec finances
-  accounts        Account[]
-  categories      FinanceCategory[]
-  financeAccounts FinanceAccount[]
+  accounts          Account[]
+  financeCategories FinanceCategory[]
+  financeAccounts   FinanceAccount[]
+
+  //Relations avec projects
+  projects          Project[]
+  projectCategories ProjectCategory[]
 
   @@map("workspace")
 }
@@ -175,47 +176,91 @@ model FinanceAccountSnapshot {
 }
 
 // ============================================
-// FEATURE: HISTORY (AUDIT LOG)
+// FEATURE: PROJECTS
 // ============================================
-model HistoryAuditLog {
-  id          String             @id @default(cuid())
-  userId      String // Qui a fait l'action
-  action      HistoryAuditAction
-  entityType  HistoryEntityType // Type d'entité (Auth, Workspace, etc.)
-  entityId    String? // ID de l'entité concernée (null si non concerné)
-  workspaceId String? // ID du workspace concerné (null pour actions liés à l'utilisateur)
-  changes     Json? // Détails des changements (before/after)
-  ipAddress   String? // IP de l'utilisateur
-  userAgent   String? // User agent du navigateur
-  createdAt   DateTime           @default(now())
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace?         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@index([entityType, entityId])
-  @@index([userId, createdAt])
-  @@index([workspaceId, createdAt])
-  @@map("audit_log")
+model Project {
+  id          String  @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+
+  tasks      Task[]
+  categories ProjectCategoryOnProject[]
+  status     ProjectStatus     @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([id, workspaceId])
+  @@map("project")
 }
 
-enum HistoryAuditAction {
-  // Actions génériques (workspaces, etc.)
-  CREATE
-  UPDATE
-  DELETE
-  // Actions d'authentification
-  REGISTER
-  LOGIN
-  LOGIN_OAUTH
-  // Actions spécifiques (futures)
-  MARK
-  UNMARK
-  ARCHIVE
-  UNARCHIVE
+model ProjectCategory {
+  id          String  @id @default(cuid())
+  workspaceId String
+  name        String
+  color       String? // Code couleur hex (#FF5733)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects ProjectCategoryOnProject[]
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name]) //Eviter les doublons de catégories dans un même workspace
+  @@unique([id, workspaceId])
+  @@map("project_category")
 }
 
-enum HistoryEntityType {
-  Auth // Actions d'authentification
-  Workspace // Actions sur les workspaces
+model ProjectCategoryOnProject {
+  @@id([workspaceId, projectId, categoryId])
+  workspaceId String
+  projectId   String
+  categoryId  String
+
+  project  Project         @relation(fields: [projectId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  category ProjectCategory @relation(fields: [categoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@map("project_category_on_project")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  status      TaskStatus   @default(TO_DO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("task")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum TaskStatus {
+  TO_DO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 // ============================================
@@ -235,8 +280,6 @@ model User {
 
   ownedWorkspaces      Workspace[]       @relation("WorkspaceOwner")
   workspaceMemberships WorkspaceMember[]
-
-  auditLogs HistoryAuditLog[]
 
   @@map("user")
 }

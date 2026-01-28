@@ -7,9 +7,6 @@ function AccountPage() {
       <Button asChild>
         <Link href="/account">Account</Link>
       </Button>
-      <Button asChild>
-        <Link href="/account/history">History</Link>
-      </Button>
     </div>
   );
 }
